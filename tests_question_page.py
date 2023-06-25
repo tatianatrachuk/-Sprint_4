@@ -5,20 +5,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 import test_config as tc
 
-class TestArrows:
 
+class BaseTest:
     @classmethod
     def setup_class(cls):
         cls.driver = cls.init_driver()
-
-    zero_arrow = [By.ID, 'accordion__heading-0']
-    first_arrow = [By.ID, 'accordion__heading-1']
-    second_arrow = [By.ID, 'accordion__heading-2']
-    third_arrow = [By.ID, 'accordion__heading-3']
-    fourth_arrow = [By.ID, 'accordion__heading-4']
-    fifth_arrow = [By.ID, 'accordion__heading-5']
-    sixth_arrow = [By.ID, 'accordion__heading-6']
-    seventh_arrow = [By.ID, 'accordion__heading-7']
 
     @staticmethod
     @allure.step('Открываем браузер Firefox')
@@ -29,10 +20,20 @@ class TestArrows:
     def open_page(self):
         self.driver.get(tc.base_url)
 
-    # @staticmethod
     @allure.step('Закрываем браузер')
     def quit_driver(self):
         self.driver.quit()
+
+class QuestionsPage(BaseTest):
+
+    zero_arrow = [By.ID, 'accordion__heading-0']
+    first_arrow = [By.ID, 'accordion__heading-1']
+    second_arrow = [By.ID, 'accordion__heading-2']
+    third_arrow = [By.ID, 'accordion__heading-3']
+    fourth_arrow = [By.ID, 'accordion__heading-4']
+    fifth_arrow = [By.ID, 'accordion__heading-5']
+    sixth_arrow = [By.ID, 'accordion__heading-6']
+    seventh_arrow = [By.ID, 'accordion__heading-7']
 
     @allure.title('Проверка первого вопроса в разделе "Вопросы о важном"')
     @allure.description(

@@ -5,12 +5,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 import test_config as tc
 
-class TestLogo:
-
+class BaseTest:
     @classmethod
     def setup_class(cls):
         cls.driver = cls.init_driver()
-
 
     @staticmethod
     @allure.step('Открываем браузер Firefox')
@@ -21,21 +19,16 @@ class TestLogo:
     def open_page(self):
         self.driver.get(tc.base_url)
 
-    # @staticmethod
     @allure.step('Закрываем браузер')
     def quit_driver(self):
         self.driver.quit()
 
-    @allure.title('Нажимаем на логотип "Самоката"')
-    @allure.description(
-        'На странице ищем и нажимаем на логотип "Самоката" и проверяет переход на главную страницу "Самоката"')
+
+class TestLogo(BaseTest):
     def check_scooter_logo(self):
         self.driver.find_element(By.CLASS_NAME, 'Header_LogoScooter__3lsAR').click()
         assert self.driver.current_url == 'https://qa-scooter.praktikum-services.ru/', self.driver.quit()
 
-    @allure.title('Нажимаем на логотип "Яндекса"')
-    @allure.description(
-        'На странице ищем и нажимаем на логотип "Яндекса" и проверяет, что в новом окне откроется главная страница Яндекса')
     def check_yandex_logo(self):
         self.driver.find_element(By.CLASS_NAME, 'Header_LogoYandex__3TSOI').click()
         self.driver.switch_to.window(self.driver.window_handles[-1])
