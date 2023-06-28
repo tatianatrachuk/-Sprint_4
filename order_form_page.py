@@ -1,29 +1,12 @@
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 import test_config as tc
 import allure
 
-class BaseTest:
-    @classmethod
-    def setup_class(cls):
-        cls.driver = cls.init_driver()
-
-    @staticmethod
-    @allure.step('Открываем браузер Firefox')
-    def init_driver():
-        return webdriver.Firefox()
-
-    @allure.step(f'Открываем страницу {tc.base_url}')
-    def open_page(self):
-        self.driver.get(tc.base_url)
-
-    @allure.step('Закрываем браузер')
-    def quit_driver(self):
-        self.driver.quit()
-
-class OrderPage(BaseTest):
+class OrderPage:
+    def __init__(self, driver):
+        self.driver = driver
 
     name_field = [By.XPATH, '//*[@placeholder="* Имя"]']
     surname_field = [By.XPATH, '//*[@placeholder="* Фамилия"]']
@@ -36,11 +19,15 @@ class OrderPage(BaseTest):
     rental_date = [By.CLASS_NAME, 'react-datepicker-wrapper']
     choose_rental_date = [By.CLASS_NAME, 'react-datepicker__day react-datepicker__day--015']
     rental_period = [By.CLASS_NAME, 'Dropdown-control']
-    choose_rental_period = [By.XPATH, '//*[@id="root"]/div/div[2]/div[2]/div[2]/div[2]/div[2]']
+    choose_rental_period = [By.XPATH, '//Dropdown-menu[text()="Сутки"]']
     button_order = [By.XPATH, 'Button_Button__ra12g Button_Middle__1CSJM']
     button_confirm = [By.XPATH, '/html/body/div/div/div[2]/div[5]/div[2]/button[2]']
     order_form = [By.CLASS_NAME, 'Order_ModalHeader__3FDaJ']
-
+    black_color = [By.ID, 'black']
+    grey_color = [By.ID, 'grey']
+    confirm_order = [By.CLASS_NAME, "Order_ModalHeader__3FDaJ"]
+    text_order = [By.CLASS_NAME, 'Order_ModalHeader__3FDaJ']
+    click_button = [By.XPATH, '/html/body/div/div/div/div[4]/div[2]/div[5]/button']
 
     def set_name(self, name):
         self.driver.find_element(*self.name_field).send_keys(name)
@@ -73,9 +60,9 @@ class OrderPage(BaseTest):
 
     def scooter_color(self, scooter_color):
         if scooter_color == 'чёрный жемчуг':
-            self.driver.find_element(By.ID, 'black').click()
+            self.driver.find_element(*self.black_color).click()
         if scooter_color == 'серая безысходность':
-            self.driver.find_element(By.ID, 'grey').click()
+            self.driver.find_element(*self.grey_color).click()
 
     def comment_field(self, comment_for_the_courier):
         if len(comment_for_the_courier) != 0:
@@ -86,11 +73,8 @@ class OrderPage(BaseTest):
 
 
     def confirm_order(self):
-        WebDriverWait(self.driver, 5).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "Order_ModalHeader__3FDaJ")))
+        WebDriverWait(self.driver, 5).until(expected_conditions.presence_of_element_located(*self.confirm_order))
         self.driver.find_element(*self.button_confirm).click()
-
-    def load_order_form(self):
-        WebDriverWait(self.driver, 5).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "Order_Modal__YZ-d3")))
 
     def check_order(self):
         assert 'Заказ оформлен' in self.driver.find_element(*self.order_form).text
@@ -111,26 +95,14 @@ class OrderPage(BaseTest):
         self.comment_field(comment_for_the_courier)
         self.button_in_order()
         self.confirm_order()
-        self.load_order_form
-        self.check_order()
-
-    @allure.title('Принятие cookie')
-    @allure.description(
-        'На странице ищем текст "И здесь куки! В общем, мы их используем." и нажимаем на кнопку "да все привыкли"')
-    def accept_cookie(self):
-        self.driver.find_element(By.ID, 'rcc-confirm-button').click()
-
-    @allure.step('Нажимаем кнопку "Заказать" в хэдере')
-    def order_button(self):
-        self.driver.find_element(By.CLASS_NAME, 'Button_Button__ra12g').click()
 
     def successful_order_check(self):
-        panel = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'Order_ModalHeader__3FDaJ')))
+        panel = wait.until(EC.presence_of_element_located(*self.text_order))
         expected_text = 'Заказ оформлен'
-        assert expected_text == panel.text, self.driver.quit()
+        assert expected_text == panel.text
 
     @allure.step('Нажимаем кнопку "Заказать" внизу страницы')
     def order_button_two(self):
         self.driver.execute_script("window.scrollTo(0, 1500)")
-        WebDriverWait(self.driver, 5).until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div/div/div/div[4]/div[2]/div[5]/button")))
-        self.driver.find_element(By.XPATH, '/html/body/div/div/div/div[4]/div[2]/div[5]/button').click()
+        WebDriverWait(self.driver, 5).until(expected_conditions.presence_of_element_located(*self.click_button))
+        self.driver.find_element(*self.click_button).click()
