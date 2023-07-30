@@ -1,12 +1,10 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
-import test_config as tc
 import allure
+from pages.base_page import BasePage
 
-class OrderPage:
-    def __init__(self, driver):
-        self.driver = driver
+class OrderPage(BasePage):
 
     name_field = [By.XPATH, '//*[@placeholder="* Имя"]']
     surname_field = [By.XPATH, '//*[@placeholder="* Фамилия"]']
@@ -14,20 +12,21 @@ class OrderPage:
     subway_field = [By.XPATH, '//*[@placeholder="* Станция метро"]']
     choose_subway_field = [By.CLASS_NAME, 'select-search__select']
     phone_field = [By.XPATH, '//*[@placeholder="* Телефон: на него позвонит курьер"]']
-    button = [By.CLASS_NAME, 'Button_Button__ra12g Button_Middle__1CSJM']
+    button = [By.CSS_SELECTOR,".Button_Button__ra12g.Button_Middle__1CSJM"]
     comment_for_the_courier = [By.XPATH, '//*[@placeholder="Комментарий для курьера"]']
     rental_date = [By.CLASS_NAME, 'react-datepicker-wrapper']
     choose_rental_date = [By.CLASS_NAME, 'react-datepicker__day react-datepicker__day--015']
     rental_period = [By.CLASS_NAME, 'Dropdown-control']
     choose_rental_period = [By.XPATH, '//Dropdown-menu[text()="Сутки"]']
-    button_order = [By.XPATH, 'Button_Button__ra12g Button_Middle__1CSJM']
-    button_confirm = [By.XPATH, '/html/body/div/div/div[2]/div[5]/div[2]/button[2]']
+    button_order = [By.CSS_SELECTOR, '.Button_Button__ra12g.Button_Middle__1CSJM']
+    button_confirm = [By.CSS_SELECTOR, '.Button_Button__ra12g.Button_Middle__1CSJM']
     order_form = [By.CLASS_NAME, 'Order_ModalHeader__3FDaJ']
     black_color = [By.ID, 'black']
     grey_color = [By.ID, 'grey']
     confirm_order = [By.CLASS_NAME, "Order_ModalHeader__3FDaJ"]
     text_order = [By.CLASS_NAME, 'Order_ModalHeader__3FDaJ']
-    click_button = [By.XPATH, '/html/body/div/div/div/div[4]/div[2]/div[5]/button']
+    click_button = [By.CSS_SELECTOR, '.Button_Button__ra12g.Button_Middle__1CSJM']
+    start_order_button = [By.CLASS_NAME, 'Button_Button__ra12g']
 
     def set_name(self, name):
         self.driver.find_element(*self.name_field).send_keys(name)
@@ -77,12 +76,16 @@ class OrderPage:
         self.driver.find_element(*self.button_confirm).click()
 
     def check_order(self):
-        assert 'Заказ оформлен' in self.driver.find_element(*self.order_form).text
+        return self.driver.find_element(*self.order_form).text
 
+    @allure.step('Нажимаем кнопку "Заказать" в хэдере')
+    def order_button(self):
+        self.driver.find_element(*self.start_order_button).click()
 
     @allure.title('Заполняем форму заказа')
-    @allure.description('На странице ищем элементы и заполняем поле соответсвуйющей информацией из файла test_config.py')
+    @allure.description('На странице ищем элементы и заполняем поле соответсвуйющей информацией из файла urls.py')
     def login(self, name, surname, address, subway, phone, scooter_color, comment_for_the_courier):
+        self.order_button()
         self.set_name(name)
         self.set_surname(surname)
         self.set_address(address)
@@ -97,12 +100,11 @@ class OrderPage:
         self.confirm_order()
 
     def successful_order_check(self):
-        panel = wait.until(EC.presence_of_element_located(*self.text_order))
-        expected_text = 'Заказ оформлен'
-        assert expected_text == panel.text
+        return wait.until(EC.presence_of_element_located(*self.text_order)).text
 
     @allure.step('Нажимаем кнопку "Заказать" внизу страницы')
     def order_button_two(self):
         self.driver.execute_script("window.scrollTo(0, 1500)")
-        WebDriverWait(self.driver, 5).until(expected_conditions.presence_of_element_located(*self.click_button))
+        WebDriverWait(self.driver, 5)
+        # .until(expected_conditions.presence_of_element_located(*self.click_button))
         self.driver.find_element(*self.click_button).click()
